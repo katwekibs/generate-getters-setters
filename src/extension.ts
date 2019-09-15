@@ -125,18 +125,12 @@ function getClassStartLine(docLines:string[],selections:vscode.Selection[]){
     let selectionStart = selections[0].start;
     for(let i = selectionStart.line; i > 0; i--){
         let line = docLines[i];
-        let jj = line.includes("export");
-        let ll =line.includes("class");
-        if(jj && ll ){
+        if(line.includes("export") && line.includes("class") ){
             res = i;
             break;
         }
     }
     return res;
-// let doc = editor.document.;
-// let invalidRange = new vscode.Range(0, 0, editor.document.lineCount /*intentionally missing the '-1' */, 0);
-// let fullRange = editor.document.validateRange(invalidRange);
-// //editor.edit(edit => edit.replace(fullRange, newText));
 }
 
 function getClassEndLine(docLines:string[],classStartLine:number){
@@ -158,7 +152,7 @@ function getClassEndLine(docLines:string[],classStartLine:number){
         if(cl.length > 0){
             let index = opened - cl.length;
             if(index <= 0){
-                res.position = singleLine.indexOf("}",cl.length - opened) + 1;
+                res.position = singleLine.indexOf("}",cl.length - opened) +;
             }
             opened -= cl.length;
         }
