@@ -49,7 +49,8 @@ export function activate(context: vscode.ExtensionContext) {
 
         try {
             var getterAndSetter = createGetterAndSetter(text);
-            editor.edit(e => e.insert(selections[selections.length - 1].end, getterAndSetter));
+            let location = computeLocation(editor, selections);
+            editor.edit(e => e.insert(new vscode.Position(location.line,location.position), getterAndSetter));
         }
         catch (error) {
             console.log(error);
@@ -107,6 +108,68 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(disposableES6);
 }
 
+function computeLocation(editor:vscode.TextEditor,selections:vscode.Selection[]){
+    let docLines = docToLines(editor)
+    let classStartLine = getClassStartLine(docLines,selections);
+    let classEndLine = getClassEndLine(docLines,classStartLine);
+    return classEndLine;
+}
+
+function docToLines(editor:vscode.TextEditor){
+    let doc = editor.document.getText();
+    let lines = doc.split('\n');
+    return lines;
+}
+function getClassStartLine(docLines:string[],selections:vscode.Selection[]){
+    let res = -1;
+    let selectionStart = selections[0].start;
+    for(let i = selectionStart.line; i > 0; i--){
+        let line = docLines[i];
+        let jj = line.includes("export");
+        let ll =line.includes("class");
+        if(jj && ll ){
+            res = i;
+            break;
+        }
+    }
+    return res;
+// let doc = editor.document.;
+// let invalidRange = new vscode.Range(0, 0, editor.document.lineCount /*intentionally missing the '-1' */, 0);
+// let fullRange = editor.document.validateRange(invalidRange);
+// //editor.edit(edit => edit.replace(fullRange, newText));
+}
+
+function getClassEndLine(docLines:string[],classStartLine:number){
+    let opened = 0;
+    let res = {
+        "line":-1,
+        "position":0
+    };
+
+    for(let line = classStartLine; line < docLines.length; line ++){
+        let singleLine = docLines[line];
+        let op = singleLine.match(/\{/g) || [];
+        let cl = singleLine.match(/\}/g) || [];
+
+        if(op.length > 0){
+            opened += op.length;
+        }
+
+        if(cl.length > 0){
+            let index = opened - cl.length;
+            if(index <= 0){
+                res.position = singleLine.indexOf("}",cl.length - opened) + 1;
+            }
+            opened -= cl.length;
+        }
+
+        if(opened < 1){
+            res.line = line;
+            break;
+        }
+    }
+    return res;
+}
 function toCamelCase(str: string) {
     return str.replace(/\w+/g, w => w[0].toUpperCase() + w.slice(1));
 }
