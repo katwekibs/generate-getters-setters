@@ -152,7 +152,7 @@ function getClassEndLine(docLines:string[],classStartLine:number){
         if(cl.length > 0){
             let index = opened - cl.length;
             if(index <= 0){
-                res.position = singleLine.indexOf("}",cl.length - opened) +;
+                res.position = singleLine.indexOf("}",cl.length - opened);
             }
             opened -= cl.length;
         }
@@ -178,8 +178,7 @@ function createGetterAndSetter(textProperties: string) {
         }
     }
 
-    let generatedCode = `
-`;
+    let generatedCode = ``;
     for (let p in properties) {
         while (properties[p].startsWith(" ")) { properties[p] = properties[p].substr(1); }
         while (properties[p].startsWith("\t")) { properties[p] = properties[p].substr(1); }
@@ -256,8 +255,7 @@ function createGetterAndSetterES6(textProperties: string) {
         }
     }
 
-    let generatedCode = `
-`;
+    let generatedCode = ``;
     for (let p in properties) {
         while (properties[p].startsWith(" ")) { properties[p] = properties[p].substr(1); }
         while (properties[p].startsWith("\t")) { properties[p] = properties[p].substr(1); }
